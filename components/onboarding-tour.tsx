@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check, ChevronRight, CircleHelp, Sparkles, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/browser";
+import { hasSupabaseEnv } from "@/lib/supabase/env";
 
 export type TourSlide={id:string;slug:string;title:string;body:string;question:string;options:string[];media_type:"image"|"video";media_url:string|null;position:number;active:boolean};
 const defaults:TourSlide[]=[
@@ -14,8 +15,8 @@ const defaults:TourSlide[]=[
 ];
 
 export function OnboardingTour(){
- const db=useMemo(()=>createClient(),[]);const router=useRouter();const [slides,setSlides]=useState(defaults);const [step,setStep]=useState(0);const [choice,setChoice]=useState("");const [answers,setAnswers]=useState<string[]>([]);const [busy,setBusy]=useState(true);
- useEffect(()=>{let live=true;const timer=window.setTimeout(()=>{void db.from("platform_tour_slides").select("id,slug,title,body,question,options,media_type,media_url,position,active").eq("active",true).order("position").then(({data,error})=>{if(live&&!error&&data?.length)setSlides(data as TourSlide[]);if(live)setBusy(false)})},0);return()=>{live=false;window.clearTimeout(timer)}},[db]);
+ const db=useMemo(()=>hasSupabaseEnv()?createClient():null,[]);const router=useRouter();const [slides,setSlides]=useState(defaults);const [step,setStep]=useState(0);const [choice,setChoice]=useState("");const [answers,setAnswers]=useState<string[]>([]);const [busy,setBusy]=useState(true);
+ useEffect(()=>{if(!db){setBusy(false);return}let live=true;const timer=window.setTimeout(()=>{void db.from("platform_tour_slides").select("id,slug,title,body,question,options,media_type,media_url,position,active").eq("active",true).order("position").then(({data,error})=>{if(live&&!error&&data?.length)setSlides(data as TourSlide[]);if(live)setBusy(false)})},0);return()=>{live=false;window.clearTimeout(timer)}},[db]);
  const slide=slides[Math.min(step,slides.length-1)];const final=step===slides.length-1;
  function advance(){if(!choice)return;setAnswers(v=>[...v.slice(0,step),choice]);setChoice("");if(!final)setStep(v=>v+1)}
  function back(){if(step===0)return;setStep(v=>v-1);setChoice(answers[step-1]||"")}
