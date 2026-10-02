@@ -4,7 +4,7 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
 
-export default function LoginForm({ phoneEnabled, message, error }: { phoneEnabled: boolean; message?: string; error?: string }) {
+export default function LoginForm({ phoneEnabled, message, error, next }: { phoneEnabled: boolean; message?: string; error?: string; next?: string }) {
   const router = useRouter();
   const [method, setMethod] = useState<"email" | "phone">("email");
   const [phoneStep, setPhoneStep] = useState<"phone" | "code">("phone");
@@ -13,14 +13,36 @@ export default function LoginForm({ phoneEnabled, message, error }: { phoneEnabl
   const [errorText, setErrorText] = useState(error ? "Bu email taklif qilingan foydalanuvchilar ro‘yxatida yo‘q yoki taklif muddati tugagan." : "");
   const [busy, setBusy] = useState(false);
 
-  async function postSignIn() {
+  async function postSignIn(session?: { access_token: string; refresh_token: string } | null) {
+    if (!session) {
+      setErrorText("Kirish sessiyasi olinmadi. Qayta urinib ko‘ring.");
+      return;
+    }
+    const sync = await fetch("/api/auth/session", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ access_token: session.access_token, refresh_token: session.refresh_token }),
+      cache: "no-store",
+    });
+    if (!sync.ok) {
+      const detail = await sync.json().catch(() => null) as { error?: string; code?: string } | null;
+      setErrorText(`Sessiya serverga uzatilmadi (HTTP ${sync.status})${detail?.code ? ` · ${detail.code}` : ""}${detail?.error ? `: ${detail.error}` : "."}`);
+      return;
+    }
     const result = await fetch("/api/session-check", { cache: "no-store" });
     if (!result.ok) {
       await createClient().auth.signOut();
-      setErrorText("Bu hisob maktab tomonidan faollashtirilmagan. Maktab administratoriga murojaat qiling.");
+      if (result.status === 401) {
+        setErrorText("Kirish muvaffaqiyatli, lekin sessiya serverga yetib bormadi. Sahifani yangilab qayta kiring.");
+      } else if (result.status === 403) {
+        setErrorText("Bu email maktab a’zoligi yoki birinchi super-admin sifatida tasdiqlanmadi. Admin email sozlamasini tekshirish kerak.");
+      } else {
+        setErrorText(`Hisob tekshiruvi bajarilmadi (HTTP ${result.status}). Server xabarlarini tekshirish kerak.`);
+      }
       return;
     }
-    router.replace("/portal");
+    const destination = next?.startsWith("/") && !next.startsWith("//") ? next : "/portal";
+    router.replace(destination);
     router.refresh();
   }
 
@@ -39,9 +61,9 @@ export default function LoginForm({ phoneEnabled, message, error }: { phoneEnabl
     const form = new FormData(event.currentTarget);
     try {
       const supabase = createClient();
-      const { error: authError } = await supabase.auth.signInWithPassword({ email: String(form.get("email")), password: String(form.get("password")) });
+      const { data, error: authError } = await supabase.auth.signInWithPassword({ email: String(form.get("email")), password: String(form.get("password")) });
       if (authError) throw authError;
-      await postSignIn();
+      await postSignIn(data.session);
     } catch (e) { setErrorText(e instanceof Error ? "Email yoki parol mos kelmadi. Taklif yuborilgan manzil bilan kiring." : "Kirish amalga oshmadi."); }
     finally { setBusy(false); }
   }
@@ -58,9 +80,9 @@ export default function LoginForm({ phoneEnabled, message, error }: { phoneEnabl
         if (authError) throw authError;
         setPhone(value); setPhoneStep("code"); setNotice("Tasdiqlash kodi yuborildi. SMS provayder xarajatlari qo‘llanadi.");
       } else {
-        const { error: authError } = await supabase.auth.verifyOtp({ phone, token: String(form.get("code")), type: "sms" });
+        const { data, error: authError } = await supabase.auth.verifyOtp({ phone, token: String(form.get("code")), type: "sms" });
         if (authError) throw authError;
-        await postSignIn();
+        await postSignIn(data.session);
       }
     } catch (e) { setErrorText(e instanceof Error ? e.message : "Telefon orqali kirib bo‘lmadi."); }
     finally { setBusy(false); }

@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, BookOpen, CalendarDays, ChartNoAxesCombined, Coins, GraduationCap, MessageCircle, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
+import { AuthFragmentHandler } from "@/components/auth-fragment-handler";
 
 const features = [
   [BookOpen, "Kundalik va baholar", "Fanlar bo‘yicha baholar, ustoz izohlari va o‘quvchi rivoji."],
@@ -19,6 +20,7 @@ export default function HomePage() {
   const configured = hasSupabaseEnv();
   const homeVideo = process.env.NEXT_PUBLIC_HOME_VIDEO_URL;
   return <>
+    <AuthFragmentHandler />
     <header className="public-nav"><Link href="/" className="brand"><Image src="/assets/maktabx-logo.svg" alt="MAKTAB X" width={184} height={44}/></Link><nav><a href="#home">Bosh sahifa</a><a href="#features">Imkoniyatlar</a><a href="#roles">Rollar</a><a href="#about">Haqida</a><Link href="/contact">Aloqa</Link></nav><div className="nav-actions"><Link className="secondary" href="/welcome">Tanishing</Link><Link className="primary" href="/login">Kirish</Link></div></header>
     <main className="landing">
       <section className="hero-public" id="home"><div><span className="eyebrow"><Sparkles size={13}/> TA’LIM JARAYONI UCHUN YAGONA PLATFORMА</span><h1>MAKTAB <em>X</em></h1><h2>Bilim, motivatsiya va raqamli maktab</h2><p>O‘quvchi, o‘qituvchi, ota-ona va maktab rahbariyati uchun xavfsiz, yagona ish muhiti.</p><div className="hero-buttons"><Link className="primary" href="/welcome">Platforma bilan tanishing <ArrowRight size={14}/></Link><Link className="secondary" href="/login">Hisobga kirish</Link></div><div className="notice">Hisoblar maktab administratori yuborgan taklif orqali ochiladi. Ommaviy ro‘yxatdan o‘tish mavjud emas.</div></div><div className="hero-art"><Image src="/assets/school-hero.png" alt="Zamonaviy maktabda o‘quvchi va MAKTAB X roboti" width={1536} height={1024} priority/>{homeVideo&&<video src={homeVideo} poster="/assets/school-hero.png" muted autoPlay loop playsInline aria-label="MAKTAB X maktabi uchun ovozsiz takrorlanuvchi animatsiya"/>}<Image className="hero-floating-robot" src="/assets/x-robot.png" alt="MAKTAB X sun’iy intellekt roboti" width={300} height={420}/><div className="hero-glass"><span>MAKTAB X</span> · Maktab hayoti bir joyda</div></div></section>
