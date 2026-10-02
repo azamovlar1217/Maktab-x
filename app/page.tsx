@@ -1,0 +1,33 @@
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, BookOpen, CalendarDays, ChartNoAxesCombined, Coins, GraduationCap, MessageCircle, ShieldCheck, Sparkles, Users } from "lucide-react";
+import { hasSupabaseEnv } from "@/lib/supabase/env";
+
+const features = [
+  [BookOpen, "Kundalik va baholar", "Fanlar bo‘yicha baholar, ustoz izohlari va o‘quvchi rivoji."],
+  [CalendarDays, "Dars jadvali", "Haftalik jadval, xonalar va o‘qituvchi biriktirish."],
+  [GraduationCap, "Uy vazifalari", "Vazifa berish, fayl biriktirish, topshirish va tekshirish."],
+  [ChartNoAxesCombined, "Davomat va hisobot", "Sinf va maktab miqyosida nazorat qilinadigan ko‘rsatkichlar."],
+  [Sparkles, "AI Ustoz", "Mavzuni bosqichma-bosqich tushuntiradigan yordamchi."],
+  [Coins, "X Coin va CoinShop", "Maktab belgilagan rag‘bat va mukofotlar."],
+  [Users, "Ota-ona portali", "Faqat bog‘langan farzandlar haqidagi ma’lumotlar."],
+  [MessageCircle, "Xabarlar", "O‘quvchi, ota-ona va ustozlar uchun ichki aloqa."],
+  [ShieldCheck, "Maktab boshqaruvi", "Rollar, sinflar, takliflar va audit jurnali."],
+];
+
+export default function HomePage() {
+  const configured = hasSupabaseEnv();
+  const homeVideo = process.env.NEXT_PUBLIC_HOME_VIDEO_URL;
+  return <>
+    <header className="public-nav"><Link href="/" className="brand"><Image src="/assets/maktabx-logo.svg" alt="MAKTAB X" width={184} height={44}/></Link><nav><a href="#home">Bosh sahifa</a><a href="#features">Imkoniyatlar</a><a href="#roles">Rollar</a><a href="#about">Haqida</a><Link href="/contact">Aloqa</Link></nav><div className="nav-actions"><Link className="secondary" href="/welcome">Tanishing</Link><Link className="primary" href="/login">Kirish</Link></div></header>
+    <main className="landing">
+      <section className="hero-public" id="home"><div><span className="eyebrow"><Sparkles size={13}/> TA’LIM JARAYONI UCHUN YAGONA PLATFORMА</span><h1>MAKTAB <em>X</em></h1><h2>Bilim, motivatsiya va raqamli maktab</h2><p>O‘quvchi, o‘qituvchi, ota-ona va maktab rahbariyati uchun xavfsiz, yagona ish muhiti.</p><div className="hero-buttons"><Link className="primary" href="/welcome">Platforma bilan tanishing <ArrowRight size={14}/></Link><Link className="secondary" href="/login">Hisobga kirish</Link></div><div className="notice">Hisoblar maktab administratori yuborgan taklif orqali ochiladi. Ommaviy ro‘yxatdan o‘tish mavjud emas.</div></div><div className="hero-art"><Image src="/assets/school-hero.png" alt="Zamonaviy maktabda o‘quvchi va MAKTAB X roboti" width={1536} height={1024} priority/>{homeVideo&&<video src={homeVideo} poster="/assets/school-hero.png" muted autoPlay loop playsInline aria-label="MAKTAB X maktabi uchun ovozsiz takrorlanuvchi animatsiya"/>}<Image className="hero-floating-robot" src="/assets/x-robot.png" alt="MAKTAB X sun’iy intellekt roboti" width={300} height={420}/><div className="hero-glass"><span>MAKTAB X</span> · Maktab hayoti bir joyda</div></div></section>
+      <section className="feature-strip" aria-label="Asosiy imkoniyatlar">{features.slice(0,4).map(([Icon,title,desc])=>{const I=Icon as typeof BookOpen;return <div className="feature-tile" key={title as string}><i><I size={16}/></i><b>{title as string}</b><p>{desc as string}</p></div>})}</section>
+      <section className="section" id="features"><div className="section-heading"><span className="eyebrow">IMKONIYATLAR</span><h2>Maktabning muhim jarayonlari bir joyda</h2><p>Baholash, davomat, vazifalar, xabarlar va ma’muriy boshqaruv. Har kim o‘z vazifasiga tegishli ma’lumotni ko‘radi.</p></div><div className="feature-grid">{features.map(([Icon,title,desc])=>{const I=Icon as typeof BookOpen;return <article className="feature-card" key={title as string}><i><I size={17}/></i><h3>{title as string}</h3><p>{desc as string}</p></article>})}</div></section>
+      <section className="role-band" id="roles"><div><span className="eyebrow">BESHTA ALOHIDA ISH JOYI</span><h2>To‘g‘ri rol, to‘g‘ri ruxsat</h2><p>Admin, direktor, o‘qituvchi, o‘quvchi va ota-ona uchun alohida navigatsiya va ma’lumotga kirish qoidalari.</p><Link className="primary" href="/login">Kirish sahifasi <ArrowRight size={14}/></Link></div><div className="role-art"><Image src="/assets/student-boy.png" alt="Maktab o‘quvchisi" width={1024} height={1536}/><Image src="/assets/student-girl.png" alt="Maktab o‘quvchisi" width={1024} height={1536}/></div></section>
+      <section className="section" id="about"><div className="section-heading"><span className="eyebrow">XAVFSIZLIK VA ISHONCH</span><h2>Maktab ma’lumotlari nazorat ostida</h2><p>O‘quvchilar hisobini faqat maktab taklif bilan yaratadi. Ota-ona faqat bog‘langan farzandini, ustoz esa faqat ruxsat berilgan sinflarni ko‘ra oladi.</p></div><div className="feature-grid"><article className="info-card"><h3>Ro‘yxatga olish taklif orqali</h3><p>Ommaviy signup yopiq. Maktab admini hisob ochish taklifini yuboradi va rolni maktab tomonidan belgilaydi.</p></article><article className="info-card"><h3>Har maktab alohida</h3><p>Ma’lumotlar maktab doirasida ajratiladi. Bazadagi RLS siyosatlari ruxsatni server tomonda tekshiradi.</p></article><article className="info-card"><h3>Hisobotlar va audit</h3><p>Ma’muriy amallar, baho va davomat o‘zgarishlari uchun kuzatuv jurnali nazarda tutilgan.</p></article></div></section>
+      <section className="faq"><div className="section-heading"><h2>Savollar</h2></div><details><summary>Qanday kiraman?</summary><p>Maktab admini bergan email taklifi orqali. Keyin Google yoki email/parol bilan kirasiz.</p></details><details><summary>Telefon bilan kirish ishlaydimi?</summary><p>Supabase’da SMS provayder sozlangandan keyin yoqiladi. SMS yuborish alohida xizmat xarajatiga ega bo‘lishi mumkin.</p></details><details><summary>Haqiqiy statistikalar ko‘rsatiladimi?</summary><p>Platformaga maktabning haqiqiy ma’lumotlari ulangandan keyingina. Ommaviy sahifada hozir maktab soni yoki natija da’volari berilmaydi.</p></details><details><summary>Animatsion video bormi?</summary><p>Landing sahifasida ovozsiz video-loop uchun joy tayyor. Tasdiqlangan video fayli assets/video ichiga qo‘shilganda avtomatik takrorlanadi; harakat kamaytirish sozlamasida poster rasmi chiqadi.</p></details></section>
+      <section className="contact-teaser"><div><span className="eyebrow">ALOQA</span><h2>Savolingiz bo‘lsa, biz shu yerdamiz</h2><p>Telefon, Telegram yoki Instagram orqali MAKTAB X jamoasiga yozing.</p></div><Link className="primary" href="/contact">Aloqa sahifasi <ArrowRight size={15}/></Link></section>
+    </main><footer className="footer"><span>© {new Date().getFullYear()} MAKTAB X · O‘zbekiston maktablari uchun</span><span>{configured?"Tizim ulanishi sozlangan":"Tizim ulanishi sozlanmoqda"}</span></footer>
+  </>;
+}

@@ -1,0 +1,2 @@
+export type SiteContact={id:number;title:string;body:string;phone:string;telegram_handle:string;instagram_handle:string;image_url:string|null;updated_by?:string|null};
+export const defaultSiteContact:SiteContact={id:1,title:"Aloqa markazi",body:"Savol, taklif yoki hamkorlik yuzasidan biz bilan bog‘laning. MAKTAB X jamoasi yordam berishga tayyor.",phone:"+998950328088",telegram_handle:"maktabx.official",instagram_handle:"maktabx.official",image_url:"/assets/contact-hero.png"};

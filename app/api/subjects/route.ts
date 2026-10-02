@@ -1,0 +1,5 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { createClient } from "@/lib/supabase/server";
+const schema=z.object({schoolId:z.string().uuid(),name:z.string().trim().min(2).max(90)});
+export async function POST(request:Request){try{const input=schema.parse(await request.json());const db=await createClient();const {data:{user}}=await db.auth.getUser();if(!user)return NextResponse.json({error:"Avval tizimga kiring."},{status:401});const {data:allowed}=await db.from("school_memberships").select("role").eq("school_id",input.schoolId).eq("user_id",user.id).eq("status","active").maybeSingle();if(!allowed||!(allowed.role==="admin"||allowed.role==="director"))return NextResponse.json({error:"Fanlarni faqat direktor yoki maktab admini yaratadi."},{status:403});const {data:id,error}=await db.rpc("create_school_subject",{target_school:input.schoolId,subject_name:input.name});if(error)throw error;return NextResponse.json({ok:true,id});}catch(e){return NextResponse.json({error:e instanceof Error?e.message:"Fan saqlanmadi."},{status:400});}}

@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: maktab-x
+    runtime: node
+    plan: free
+    buildCommand: corepack pnpm install --frozen-lockfile && corepack pnpm build
+    startCommand: corepack pnpm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: PLATFORM_BOOTSTRAP_EMAIL
+        sync: false
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
